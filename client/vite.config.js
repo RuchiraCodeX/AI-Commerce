@@ -1,7 +1,15 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    tailwindcss(),
+  ],
+  server: {
+    proxy: {
+      '/products': 'http://localhost:5000',
+      '/cart': 'http://localhost:5000',
+      '/auth': 'http://localhost:5000',
+    },
+  },
 })
