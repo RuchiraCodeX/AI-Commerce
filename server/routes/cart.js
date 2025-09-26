@@ -1,4 +1,12 @@
+const express = require("express");
+const Order = require("../models/Order");
+const Product = require("../models/Product");
+const Cart = require("../models/Cart");
+const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
+
+const router = express.Router();
+
 // Admin: get all orders
 router.get("/", auth, admin, async (req, res) => {
   try {
@@ -24,14 +32,6 @@ router.put("/:orderId", auth, admin, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-const express = require("express");
-
-const Order = require("../models/Order");
-const Product = require("../models/Product");
-const Cart = require("../models/Cart");
-const auth = require("../middleware/auth");
-
-const router = express.Router();
 // Get current user's cart
 router.get("/me", auth, async (req, res) => {
   try {

@@ -1,5 +1,16 @@
+
+const express = require("express");
 const multer = require("multer");
 const path = require("path");
+const Product = require("../models/Product");
+const Trie = require("../utils/trie");
+
+const mongoose = require("mongoose");
+const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
+
+const router = express.Router();
+const trie = new Trie();
 
 // Multer config for image upload
 const storage = multer.diskStorage({
@@ -14,18 +25,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Image upload endpoint (admin only)
+// ...existing code...
 router.post("/upload", auth, admin, upload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   // Return relative URL for frontend
   res.json({ url: `/uploads/${req.file.filename}` });
 });
-const express = require("express");
-const Product = require("../models/Product");
-const Trie = require("../utils/trie");
-const mongoose = require("mongoose");
-
-const router = express.Router();
-const trie = new Trie();
 
 // Load products into Trie at server startup
 async function loadTrie() {
@@ -74,8 +79,6 @@ router.get("/search/:prefix", async (req, res) => {
   }
 });
 
-const auth = require("../middleware/auth");
-const admin = require("../middleware/admin");
 
 // Add new product (admin only)
 router.post("/", auth, admin, async (req, res) => {
