@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthContext";
+// AdminRoute: only allow admin users
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user && user.isAdmin ? children : <Navigate to="/" />;
+}
 import { fetchCart, updateCart, addToCart as apiAddToCart, removeFromCart as apiRemoveFromCart } from "./api/cart";
 
 import ProductsList from "./Components/Product List/ProductsList";
@@ -14,6 +20,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import SearchBar from "./Components/Searchbar/SearchBar";
 import ProductDetail from "./pages/ProductDetail";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminProducts from "./pages/AdminProducts";
+import AdminOrders from "./pages/AdminOrders";
+import AdminUsers from "./pages/AdminUsers";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -60,10 +70,15 @@ function AppRoutes(props) {
           />
         }
       />
-  <Route path="/product/:id" element={<ProductDetail addToCart={props.addToCart} />} />
-      </Routes>
-    );
-  }
+      <Route path="/product/:id" element={<ProductDetail addToCart={props.addToCart} />} />
+      <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
+        <Route path="products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
+        <Route path="orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+        <Route path="users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+      </Route>
+    </Routes>
+  );
+}
 
 function AppWithAuth() {
   const [results, setResults] = useState([]); // search results
