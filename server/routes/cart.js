@@ -1,3 +1,29 @@
+const admin = require("../middleware/admin");
+// Admin: get all orders
+router.get("/", auth, admin, async (req, res) => {
+  try {
+    const orders = await Order.find().populate("items.productId userId");
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: update order status
+router.put("/:orderId", auth, admin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const order = await Order.findByIdAndUpdate(
+      req.params.orderId,
+      { status },
+      { new: true }
+    ).populate("items.productId userId");
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 const express = require("express");
 
 const Order = require("../models/Order");
