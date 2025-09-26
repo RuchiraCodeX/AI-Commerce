@@ -1,10 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ title: "", price: "", description: "", category: "", images: [""] });
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef();
+  // Handle image file upload
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const res = await fetch("/products/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      setForm((f) => ({ ...f, images: [data.url] }));
+    } catch (err) {
+      setError("Image upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
   const [editingId, setEditingId] = useState(null);
 
   // Fetch products
@@ -87,7 +111,33 @@ export default function AdminProducts() {
         <input name="price" value={form.price} onChange={handleChange} placeholder="Price" type="number" className="border p-2 rounded w-full" required />
         <input name="category" value={form.category} onChange={handleChange} placeholder="Category" className="border p-2 rounded w-full" />
         <input name="description" value={form.description} onChange={handleChange} placeholder="Description" className="border p-2 rounded w-full" />
-        <input name="images" value={form.images[0]} onChange={e => setForm(f => ({ ...f, images: [e.target.value] }))} placeholder="Image URL" className="border p-2 rounded w-full" />
+        <div className="flex gap-2 items-center">
+          <input
+            name="images"
+            value={form.images[0]}
+            onChange={e => setForm(f => ({ ...f, images: [e.target.value] }))}
+            placeholder="Image URL"
+            className="border p-2 rounded w-full"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current && fileInputRef.current.click()}
+            className="bg-gray-200 px-2 py-1 rounded text-sm"
+            disabled={uploading}
+          >
+            {uploading ? "Uploading..." : "Upload"}
+          </button>
+        </div>
+        {form.images[0] && (
+          <img src={form.images[0]} alt="Preview" className="h-16 mt-2 rounded border" />
+        )}
         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded font-semibold">
           {editingId ? "Update" : "Add"} Product
         </button>

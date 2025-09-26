@@ -3,9 +3,13 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+// Serve uploaded images
+const path = require("path");
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)

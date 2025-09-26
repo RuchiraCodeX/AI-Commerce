@@ -1,3 +1,24 @@
+const multer = require("multer");
+const path = require("path");
+
+// Multer config for image upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "../..", "uploads"));
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
+  },
+});
+const upload = multer({ storage });
+
+// Image upload endpoint (admin only)
+router.post("/upload", auth, admin, upload.single("image"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+  // Return relative URL for frontend
+  res.json({ url: `/uploads/${req.file.filename}` });
+});
 const express = require("express");
 const Product = require("../models/Product");
 const Trie = require("../utils/trie");
