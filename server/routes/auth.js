@@ -8,6 +8,31 @@ const admin = require("../middleware/admin");
 
 const router = express.Router();
 
+// LOGIN
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!validPassword) return res.status(400).json({ message: "Invalid credentials" });
+
+    // Create JWT token with role
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ token, isAdmin: user.isAdmin, name: user.name, email: user.email });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 // Admin: get all users
 router.get("/", auth, admin, async (req, res) => {
   try {
