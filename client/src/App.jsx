@@ -43,13 +43,21 @@ function AppRoutes(props) {
                 <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Welcome to AI-Commerce</h1>
                 <p className="text-gray-600 text-lg">Your modern marketplace for smart shopping. Browse products, add to cart, and enjoy a seamless experience!</p>
               </section>
-              <div className="mb-8 max-w-xl mx-auto">
+
+             <div className="mb-8 max-w-xl mx-auto">
                 <SearchBar onResults={props.setResults} />
               </div>
               <div className="flex flex-col lg:flex-row gap-8">
                 <div className="flex-1">
-                  <ProductsList products={props.results} addToCart={props.addToCart} />
+                  <ProductsList products={props.results} addToCart={props.addToCart} removeFromCart={props.removeFromCart} />
                 </div>
+                {props.user?.isAdmin && (
+                  <div className="flex-1">
+                    <AdminDashboard products={props.products} />
+                  </div>
+                )}
+
+
               </div>
             </main>
             <Footer />
